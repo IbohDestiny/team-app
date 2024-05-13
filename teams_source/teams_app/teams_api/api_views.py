@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from teams_app.models import Relationship, Team
+from teams_app.models import Relationship, Team, Role, Status
 from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer, JoinableTeamsSerializer
 from rest_framework.exceptions import NotFound, AuthenticationFailed, PermissionDenied
 from rest_framework.decorators import api_view
@@ -78,9 +78,28 @@ class TeamView(viewsets.ModelViewSet):
         return Team.objects.filter(private=False).exclude(id__in=exclude_list)
     
     def create(self, request:HttpRequest):
+        #Create Team
         serializer = TeamSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+
+        #Add Team Owner
+        #Check if username exists
+        if not User.objects.filter(username=request.data["username"]).exists():
+            raise NotFound(detail="Error, invalid username", code=404)
+        
+        owner_data = {
+            "user": User.objects.get(username=request.data["username"]),
+            "team": Team.objects.get(name=serializer.data["name"]),
+            "role": Role.objects.get(role="Owner"),
+            "status": Status.objects.get(status="Active")
+        }
+        
+        owner_serializer = RelationshipSerializer(data = owner_data)
+        owner_serializer.is_valid(raise_exception=True)
+        owner_serializer.save()
+
         return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
 
 class TeamManager(viewsets.ModelViewSet):
