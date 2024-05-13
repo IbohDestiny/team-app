@@ -3,9 +3,7 @@ from rest_framework.response import Response
 from teams_app.models import Relationship, Team, Role, Status
 from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer, JoinableTeamsSerializer
 from rest_framework.exceptions import NotFound, AuthenticationFailed, PermissionDenied
-from rest_framework.decorators import api_view
-from rest_framework.views import APIView
-from rest_framework import status
+from django.db.models.functions import Lower
 from rest_framework import permissions 
 from django.contrib.auth.models import User
 from django.http.response import JsonResponse, HttpResponseRedirect
@@ -59,7 +57,7 @@ class AllUserTeamsViewSet(viewsets.ModelViewSet):
 
         teams_permission_check(self.request, username)
 
-        return Relationship.objects.filter(user__username=username, status_id=1).all()
+        return Relationship.objects.order_by(Lower("role__id")).filter(user__username=username, status_id=1).all()
 
 class TeamView(viewsets.ModelViewSet):
 
