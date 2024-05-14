@@ -107,7 +107,7 @@ def focus_team_view(request, team_id):
             elif data["type"] == "delete_team":
                 print("Deleting team")
                 Team.objects.get(id=team_id).delete()
-                return redirect("/team_viewer")
+                return redirect("/teams")
         else:
             if "name" in request.POST and "description" in request.POST:
                 team_edit_form = CreateTeamForm(request.POST)

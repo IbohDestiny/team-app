@@ -1,12 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework import status
 from teams_app.models import Relationship, Team, Role, Status
-from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer, JoinableTeamsSerializer
+from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer
 from rest_framework.exceptions import NotFound, AuthenticationFailed, PermissionDenied
 from django.db.models.functions import Lower
 from rest_framework import permissions 
 from django.contrib.auth.models import User
-from django.http.response import JsonResponse, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, JsonResponse
 from django.http.request import HttpRequest
 from .serializers.teams_list import AllTeamSerializer
 from django.shortcuts import get_object_or_404
@@ -78,9 +79,10 @@ class TeamView(viewsets.ModelViewSet):
     def create(self, request:HttpRequest):
         #Create Team
         serializer = TeamSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         #Add Team Owner
         #Check if username exists
@@ -95,10 +97,10 @@ class TeamView(viewsets.ModelViewSet):
         }
         
         owner_serializer = RelationshipSerializer(data = owner_data)
-        owner_serializer.is_valid(raise_exception=True)
+        owner_serializer.is_valid()
         owner_serializer.save()
 
-        return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
+        return JsonResponse(data={"message": "success"}, status=200)
 
 class TeamManager(viewsets.ModelViewSet):
 
