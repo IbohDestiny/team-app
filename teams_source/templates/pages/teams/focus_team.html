@@ -142,9 +142,30 @@
                             </div>
                             {% endfor %}
                             <div class="field">
-                                <button class="button is-info">Edit team</button>
+                                <button class="button is-info">Edit team</button>                                
                             </div>
                         </form>
+
+                        <div class="main">
+                            <div class="container">
+                                <div class="columns is-centered">
+                                    <div class="column is-one-quarter">
+                                        <article class="message is-confirmation" style="display: none; position: fixed; z-index: 5;" id="confirmationBox">
+                                            <div class="message-header">
+                                                <p>Editing Team</p>
+                                                <button class="delete" aria-label="Edit" id="editConfirmation"></button>
+                                            </div>
+                                            <div class="message-body" style="text-align: center; color: white;">
+                                                <h1><b>This will edit the team</b></h1>
+                                                <p>Are you sure you want to edit this team with your selected settings?</p>
+                                                <button class="button button2", id="confirmEditTeam"><b>Confirm</b></button>
+                                                <button class="button button1", id="cancelEditTeam"><b>Cancel</b></button>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         <div class="pt-4">
                             <label class="label">Danger Zone:</label>
                             <button class="button is-danger" onclick="removeTeamButton()">Delete Team</button>

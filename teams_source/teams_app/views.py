@@ -114,10 +114,14 @@ def focus_team_view(request, team_id):
                 current_team = Team.objects.get(id=team_id)
                 current_team.name = team_edit_form.data["name"]
                 current_team.description = team_edit_form.data["description"]
-                if team_edit_form.data["private"] == "on":
-                    current_team.private = True
-                else:
+                try:
+                    if team_edit_form.data["private"] == "on":
+                        current_team.private = True
+                    else:
+                        current_team.private = False
+                except:
                     current_team.private = False
+                    
                 current_team.save()
             elif "user" in request.POST and "role" in request.POST:
                 if request.POST.get("user"):
@@ -242,3 +246,7 @@ def profile(request):
 
     context = {"countries":countries, "current_country":country_name}
     return render(request, "pages/profile.html", context)
+
+def privacycheck(request):
+    my_variable = "Hello world"
+    return render( request, 'pages/teams/focus_team.html', { 'my_variable' : my_variable })
