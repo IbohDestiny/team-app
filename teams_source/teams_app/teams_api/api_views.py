@@ -1,14 +1,13 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
-from teams_app.models import Relationship, Team
-from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer, JoinableTeamsSerializer
-from rest_framework.exceptions import NotFound, AuthenticationFailed, PermissionDenied
-from rest_framework.decorators import api_view
-from rest_framework.views import APIView
 from rest_framework import status
+from teams_app.models import Relationship, Team, Role, Status
+from .api_serializer import UsersTeamsSerializer, AdditionalTeam, TeamSerializer, RelationshipSerializer
+from rest_framework.exceptions import NotFound, AuthenticationFailed, PermissionDenied
+from django.db.models.functions import Lower
 from rest_framework import permissions 
 from django.contrib.auth.models import User
-from django.http.response import JsonResponse, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect, JsonResponse
 from django.http.request import HttpRequest
 from .serializers.teams_list import AllTeamSerializer
 from django.shortcuts import get_object_or_404
@@ -59,7 +58,7 @@ class AllUserTeamsViewSet(viewsets.ModelViewSet):
 
         teams_permission_check(self.request, username)
 
-        return Relationship.objects.filter(user__username=username, status_id=1).all()
+        return Relationship.objects.order_by(Lower("role__id")).filter(user__username=username, status_id=1).all()
 
 class TeamView(viewsets.ModelViewSet):
 
@@ -78,10 +77,30 @@ class TeamView(viewsets.ModelViewSet):
         return Team.objects.filter(private=False).exclude(id__in=exclude_list)
     
     def create(self, request:HttpRequest):
+        #Create Team
         serializer = TeamSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        #Add Team Owner
+        #Check if username exists
+        if not User.objects.filter(username=request.data["username"]).exists():
+            raise NotFound(detail="Error, invalid username", code=404)
+        
+        owner_data = {
+            "user": User.objects.get(username=request.data["username"]),
+            "team": Team.objects.get(name=serializer.data["name"]),
+            "role": Role.objects.get(role="Owner"),
+            "status": Status.objects.get(status="Active")
+        }
+        
+        owner_serializer = RelationshipSerializer(data = owner_data)
+        owner_serializer.is_valid()
+        owner_serializer.save()
+
+        return JsonResponse(data={"message": "success"}, status=200)
 
 class TeamManager(viewsets.ModelViewSet):
 
@@ -94,3 +113,9 @@ class TeamManager(viewsets.ModelViewSet):
     def get_object(self):
         rel = get_object_or_404(Relationship, user_id=self.request.data["user"])
         return rel
+    
+    def create(self, request:HttpRequest):
+        serializer = RelationshipSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
