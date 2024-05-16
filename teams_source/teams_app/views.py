@@ -105,7 +105,6 @@ def focus_team_view(request, team_id):
                 rel = Relationship.objects.filter(user_id=data["user_id"], team_id=team_id)
                 rel.delete()
             elif data["type"] == "delete_team":
-                print("Deleting team")
                 Team.objects.get(id=team_id).delete()
                 return redirect("/teams")
         else:

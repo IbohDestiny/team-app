@@ -14,5 +14,6 @@ router.register(r'joinable', TeamManager, basename="joinable")
 urlpatterns = [
     path('', include(router.urls)),
     re_path('^members/(?P<team>.+)/$', MembersTeamViewSet),
+    re_path('^members/(?P<id>.+)/$', MembersTeamViewSet),
     re_path('^teams/?P<username>.+/$', AllUserTeamsViewSet),
 ]

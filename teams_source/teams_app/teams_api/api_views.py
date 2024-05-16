@@ -39,11 +39,21 @@ class MembersTeamViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         team = self.request.query_params.get("team")
-        if not team:
+        id = self.request.query_params.get("id")
+        
+        if not team and not id:
             raise NotFound(detail="Error, no given team", code=404)
-        elif not Team.objects.get(name=team):
-            raise NotFound(detail="Error, invalid team", code=404)
-        return Team.objects.filter(name=team).all()
+        
+        if self.request.query_params.get("team"):
+            if not Team.objects.get(name=team):
+                raise NotFound(detail="Error, invalid team", code=404)
+            return Team.objects.filter(name=team).all()
+        elif self.request.query_params.get("id"):
+            if not Team.objects.get(id=id):
+                raise NotFound(detail="Error, invalid team", code=404)
+            return Team.objects.filter(id=id).all()
+
+        
 
 class AllUserTeamsViewSet(viewsets.ModelViewSet):
 
@@ -78,7 +88,14 @@ class TeamView(viewsets.ModelViewSet):
     
     def create(self, request:HttpRequest):
         #Create Team
-        serializer = TeamSerializer(data=request.data)
+        team_data = request.data.dict()
+        if team_data["private"] == "on":
+            team_data["private"] = True
+        else:
+            team_data["private"] = False
+        
+        print(team_data)
+        serializer = TeamSerializer(data=team_data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
         else:
