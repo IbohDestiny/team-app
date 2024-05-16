@@ -26,6 +26,28 @@ function deleteTeam(token) {
     })
 }
 
+function editTeam(token) {
+    var data = JSON.stringify({})
+    fetch(window.location.href, {
+        method: "post",
+        headers: {
+            "X-CSRFToken": token
+        },
+        body: data
+    })
+    .then(() => {
+        location.assign("/teams")
+    })
+}
+
+function editTeamButton() {
+    document.getElementById("editTeamConfirmation").style.display = "block";
+}
+
+function closeEditMenu() {
+    document.getElementById("editTeamConfirmation").style.display = "none";
+}
+
 function removeTeamButton() {
     document.getElementById("deleteTeamConfirmation").style.display = "block";
 }

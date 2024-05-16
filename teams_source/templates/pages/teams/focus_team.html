@@ -142,7 +142,7 @@
                             </div>
                             {% endfor %}
                             <div class="field">
-                                <button class="button is-info">Edit team</button>                                
+                                <button class="button is-info" onclick="">Edit team</button>                                
                             </div>
                         </form>
 
@@ -150,10 +150,10 @@
                             <div class="container">
                                 <div class="columns is-centered">
                                     <div class="column is-one-quarter">
-                                        <article class="message is-confirmation" style="display: none; position: fixed; z-index: 5;" id="confirmationBox">
+                                        <article class="message is-confirmation" style="display: none; position: fixed; z-index: 5;" id="editTeamConfirmation">
                                             <div class="message-header">
                                                 <p>Editing Team</p>
-                                                <button class="delete" aria-label="Edit" id="editConfirmation"></button>
+                                                <button class="delete" aria-label="Edit" id="editTeamButton"></button>
                                             </div>
                                             <div class="message-body" style="text-align: center; color: white;">
                                                 <h1><b>This will edit the team</b></h1>
