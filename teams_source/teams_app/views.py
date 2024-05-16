@@ -91,7 +91,7 @@ def focus_team_view(request, team_id):
     #JC - This will redirect them if they don't have permission to view the team
     if Team.objects.filter(id=team_id)[0].private:
         if not Relationship.objects.filter(user=request.user, team_id=team_id, status=1).exists():
-            return redirect("/team_viewer")
+            return redirect("/teams")
 
     #JC - This recives the data from the web page
     messages = []
@@ -150,7 +150,7 @@ def focus_team_view(request, team_id):
     try:
         team = Team.objects.get(id=team_id)
     except:
-        return redirect("/team_viewer")
+        return redirect("/teams")
     
     member_list = Relationship.objects.filter(team=team, status=1)
     role_list = Role.objects.all()

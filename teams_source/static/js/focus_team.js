@@ -22,7 +22,7 @@ function deleteTeam(token) {
         body: data
     })
     .then(() => {
-        location.assign("/team_viewer")
+        location.assign("/teams")
     })
 }
 
