@@ -21,6 +21,18 @@
                             <button class="button is-danger" id="cancelDelete" onclick="closeDeletionMenu()">Cancel</button>
                         </div>
                     </article>
+
+                    <article class="message is-info" style="display: none; position: fixed; z-index: 5;" id="editTeamConfirmation">
+                        <div class="message-header">
+                            <p>Edit Team</p>
+                            <button class="info" aria-label="edit" id="deleteTeamClose" onclick="closeEditMenu()"></button>
+                        </div>
+                        <div class="message-body" style="text-align: center;">
+                            <p>Edit the team?</p>
+                            <button class="button is-info" id="editTeam" onclick="confirmEdit()">Confirm</button>
+                            <button class="button is-info" id="cancelDelete" onclick="closeEditMenu()">Cancel</button>
+                        </div>
+                    </article>
                 </div>
             </div>
         </div>
@@ -120,7 +132,7 @@
                                 Team Management
                             </span>
                         </div>
-                        <form method="POST" action="/team/{{ team_id }}">
+                    <form method="POST" action="/team/{{ team_id }}" id="editTeamForm">
                             {% csrf_token %}
                             {% for field in edit_form %}
                             <div class="field">
@@ -140,31 +152,12 @@
                                 </label>
                                 {% endif %}
                             </div>
-                            {% endfor %}
-                            <div class="field">
-                                <button class="button is-info" onclick="">Edit team</button>                                
-                            </div>
+                            {% endfor %} 
                         </form>
 
-                        <div class="main">
-                            <div class="container">
-                                <div class="columns is-centered">
-                                    <div class="column is-one-quarter">
-                                        <article class="message is-confirmation" style="display: none; position: fixed; z-index: 5;" id="editTeamConfirmation">
-                                            <div class="message-header">
-                                                <p>Editing Team</p>
-                                                <button class="delete" aria-label="Edit" id="editTeamButton"></button>
-                                            </div>
-                                            <div class="message-body" style="text-align: center; color: white;">
-                                                <h1><b>This will edit the team</b></h1>
-                                                <p>Are you sure you want to edit this team with your selected settings?</p>
-                                                <button class="button button2", id="confirmEditTeam"><b>Confirm</b></button>
-                                                <button class="button button1", id="cancelEditTeam"><b>Cancel</b></button>
-                                            </div>
-                                        </article>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="field">
+                            <button class="button is-info" onclick="editTeamButton()">Edit team</button>                                
+                        </div>
                             
                         <div class="pt-4">
                             <label class="label">Danger Zone:</label>
