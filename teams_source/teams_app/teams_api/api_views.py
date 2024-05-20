@@ -13,7 +13,7 @@ from .serializers.teams_list import AllTeamSerializer
 from django.shortcuts import get_object_or_404
 import hashlib
 
-def teams_permission_check(request, username):
+def teams_permission_check(request:HttpRequest, username):
     token = request.META.get("HTTP_TEAMS_TOKEN")
     if not token:
         raise AuthenticationFailed("No Token Found")
@@ -89,12 +89,14 @@ class TeamView(viewsets.ModelViewSet):
     def create(self, request:HttpRequest):
         #Create Team
         team_data = request.data.dict()
-        if team_data["private"] == "on":
-            team_data["private"] = True
+        if team_data.get("private") is not None:
+            if team_data["private"] == "on":
+                team_data["private"] = True
+            else:
+                team_data["private"] = False
         else:
             team_data["private"] = False
         
-        print(team_data)
         serializer = TeamSerializer(data=team_data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -117,7 +119,8 @@ class TeamView(viewsets.ModelViewSet):
         owner_serializer.is_valid()
         owner_serializer.save()
 
-        return JsonResponse(data={"message": "success"}, status=200)
+        team_id = Team.objects.get(name=serializer.data["name"]).id
+        return JsonResponse(data={"message": "success", "id": team_id}, status=200)
 
 class TeamManager(viewsets.ModelViewSet):
 
@@ -136,3 +139,12 @@ class TeamManager(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
+    
+    def destroy(self, request:HttpRequest, pk=None):
+        rel = Relationship.objects.get(team=request.data["team"], user__username=request.data["user"])
+        if rel is not None:
+            rel.delete()
+        else:
+            return JsonResponse(data={"message": "Failed to find relationship."}, status=404)
+        
+        return JsonResponse(status=200)
