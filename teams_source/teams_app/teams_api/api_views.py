@@ -171,5 +171,17 @@ class ManageTeam(viewsets.ModelViewSet):
             rel[0].delete()
             return JsonResponse(data={"message": "success"}, status=200)
 
+        elif str(method).lower() == "favourite":
+            rel = Relationship.objects.filter(user__username=request.data["username"], team__id=request.data["team"], status=Status.objects.get(status="Active"))
+            if not rel.exists():
+                return JsonResponse(data={"error": "Relationship not found"} ,status=404)
+            if rel[0].favourite:
+                rel[0].favourite = False
+            else:
+                rel[0].favourite = True
+
+            rel[0].save()
+            
+
         else:
             return JsonResponse(data={"error": "Invalid Method"}, status=404)
