@@ -172,6 +172,7 @@ class ManageTeam(viewsets.ModelViewSet):
             return JsonResponse(data={"message": "success"}, status=200)
 
         elif str(method).lower() == "favourite":
+            print(request.data)
             rel = Relationship.objects.filter(user__username=request.data["username"], team__id=request.data["team"], status=Status.objects.get(status="Active"))
             if not rel.exists():
                 return JsonResponse(data={"error": "Relationship not found"} ,status=404)
@@ -179,9 +180,10 @@ class ManageTeam(viewsets.ModelViewSet):
                 rel[0].favourite = False
             else:
                 rel[0].favourite = True
+            print(rel[0].favourite)
 
             rel[0].save()
-            
+            return JsonResponse(data={"message": "success"}, status=200)
 
         else:
             return JsonResponse(data={"error": "Invalid Method"}, status=404)
