@@ -168,9 +168,9 @@ def focus_team_view(request, team_id):
                     "user_permission": user_permission, "role_id": user_role_id, "team_id": team_id, "messages": messages, "edit_form": team_edit_form})
 
 #JC - Team management page
-@login_required
-def team_management_view(request):
-    return render(request, "pages/teams/team_manager.html", {"management_active": True})
+# @login_required
+# def team_management_view(request):
+#     return render(request, "pages/teams/team_manager.html", {"management_active": True})
 
 #JC - Create team view
 @login_required
