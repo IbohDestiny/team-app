@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models.functions import Lower
 from .forms import LoginForm, RegisterForm, CreateTeamForm
-from .models import Team, Role, Relationship, Status, UserProfile
+from .models import Team, Role, Relationship, Status
 import holidays, pycountry
 import json
 
