@@ -176,13 +176,14 @@ class ManageTeam(viewsets.ModelViewSet):
             rel = Relationship.objects.filter(user__username=request.data["username"], team__id=request.data["team"], status=Status.objects.get(status="Active"))
             if not rel.exists():
                 return JsonResponse(data={"error": "Relationship not found"} ,status=404)
-            if rel[0].favourite:
-                rel[0].favourite = False
+            
+            teamRel:Relationship = rel[0]
+            if teamRel:
+                teamRel.favourite = False
             else:
-                rel[0].favourite = True
-            print(rel[0].favourite)
+                teamRel.favourite = True
 
-            rel[0].save()
+            teamRel.save(force_update=True)
             return JsonResponse(data={"message": "success"}, status=200)
 
         else:
