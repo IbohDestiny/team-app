@@ -25,7 +25,7 @@ class TeamSerializer(serializers.ModelSerializer):
     count = serializers.IntegerField(read_only=True)
     class Meta:
         model = Team
-        fields = ["name", "description", "notes", "private", "count"]
+        fields = ["id", "name", "description", "notes", "private", "count"]
 
 
 #JC - Serializer for api/teams

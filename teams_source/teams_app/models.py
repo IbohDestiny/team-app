@@ -48,6 +48,7 @@ class Relationship(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
+    favourite = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (
