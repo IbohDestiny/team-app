@@ -28,4 +28,4 @@ class AllTeamSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
     class Meta:
         model = Relationship
-        fields = ["team", "role"]
+        fields = ["team", "role", "favourite"]

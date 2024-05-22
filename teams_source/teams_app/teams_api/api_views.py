@@ -13,7 +13,7 @@ from .serializers.teams_list import AllTeamSerializer
 from django.shortcuts import get_object_or_404
 import hashlib
 
-def teams_permission_check(request, username):
+def teams_permission_check(request:HttpRequest, username):
     token = request.META.get("HTTP_TEAMS_TOKEN")
     if not token:
         raise AuthenticationFailed("No Token Found")
@@ -89,12 +89,14 @@ class TeamView(viewsets.ModelViewSet):
     def create(self, request:HttpRequest):
         #Create Team
         team_data = request.data.dict()
-        if team_data["private"] == "on":
-            team_data["private"] = True
+        if team_data.get("private") is not None:
+            if team_data["private"] == "on":
+                team_data["private"] = True
+            else:
+                team_data["private"] = False
         else:
             team_data["private"] = False
         
-        print(team_data)
         serializer = TeamSerializer(data=team_data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -117,22 +119,72 @@ class TeamView(viewsets.ModelViewSet):
         owner_serializer.is_valid()
         owner_serializer.save()
 
-        return JsonResponse(data={"message": "success"}, status=200)
+        team_id = Team.objects.get(name=serializer.data["name"]).id
+        return JsonResponse(data={"message": "success", "id": team_id}, status=200)
 
-class TeamManager(viewsets.ModelViewSet):
+class JoinableTeams(viewsets.ModelViewSet):
+
+    serializer_class = TeamSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        username = self.request.query_params.get("username")
+        if not username:
+            raise NotFound(detail="Error, no given username", code=404)
+        elif not User.objects.filter(username=username).exists():
+            raise NotFound(detail="Error, invalid username", code=404)
+
+        return Team.objects.all().exclude(relationship__user=User.objects.get(username=username))
+
+
+class ManageTeam(viewsets.ModelViewSet):
 
     serializer_class = RelationshipSerializer
     permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        return Relationship.objects.all()
-    
-    def get_object(self):
-        rel = get_object_or_404(Relationship, user_id=self.request.data["user"])
-        return rel
-    
     def create(self, request:HttpRequest):
-        serializer = RelationshipSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return HttpResponseRedirect(redirect_to="http://" + request.data["url"] + "/teams/")
+        method = request.query_params.get("method")
+        if not method:
+            return JsonResponse(data={"error": "Invalid Method (Join, Leave)"}, status=404)
+
+        if str(method).lower() == "join":
+            if not request.data.get("username") or not request.data.get("team"):
+                return JsonResponse(data={"error": "Username or Team ID not provided"}, status=404)
+            team_data = {
+                "user": User.objects.get(username=request.data["username"]),
+                "team": Team.objects.get(id=request.data["team"]),
+                "role": Role.objects.get(role="Member"),
+                "status": Status.objects.get(status="Active")
+            }
+
+            serializer = RelationshipSerializer(data=team_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return JsonResponse(data={"message": "success"}, status=200)
+        
+        elif str(method).lower() == "leave":
+            rel = Relationship.objects.filter(user__username=request.data["username"], team__id=request.data["team"], status=Status.objects.get(status="Active"))
+            if not rel.exists():
+                return JsonResponse(data={"error": "Relationship not found"} ,status=404)
+            
+            rel[0].delete()
+            return JsonResponse(data={"message": "success"}, status=200)
+
+        elif str(method).lower() == "favourite":
+            print(request.data)
+            rel = Relationship.objects.filter(user__username=request.data["username"], team__id=request.data["team"], status=Status.objects.get(status="Active"))
+            if not rel.exists():
+                return JsonResponse(data={"error": "Relationship not found"} ,status=404)
+            
+            teamRel:Relationship = rel[0]
+            if teamRel:
+                teamRel.favourite = False
+            else:
+                teamRel.favourite = True
+
+            teamRel.save(force_update=True)
+            return JsonResponse(data={"message": "success"}, status=200)
+
+        else:
+            return JsonResponse(data={"error": "Invalid Method"}, status=404)

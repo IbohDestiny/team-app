@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models.functions import Lower
 from .forms import LoginForm, RegisterForm, CreateTeamForm
-from .models import Team, Role, Relationship, Status, UserProfile
+from .models import Team, Role, Relationship, Status
 import holidays, pycountry
 import json
 
@@ -113,7 +113,7 @@ def focus_team_view(request, team_id):
                 current_team = Team.objects.get(id=team_id)
                 current_team.name = team_edit_form.data["name"]
                 current_team.description = team_edit_form.data["description"]
-                try:
+                try: #This try except will handle the strange error caused by editing the team with the "Private Team" box unchecked, fixing the issue.
                     if team_edit_form.data["private"] == "on":
                         current_team.private = True
                     else:

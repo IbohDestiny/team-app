@@ -9,7 +9,8 @@ router = routers.DefaultRouter()
 router.register(r'members', MembersTeamViewSet, basename="members")
 router.register(r'user/teams', AllUserTeamsViewSet, basename="users_teams")
 router.register(r'teams', TeamView, basename="creator")
-router.register(r'joinable', TeamManager, basename="joinable")
+router.register(r'joinable', JoinableTeams, basename="joinable")
+router.register(r'manage', ManageTeam, basename="manage")
 
 urlpatterns = [
     path('', include(router.urls)),
