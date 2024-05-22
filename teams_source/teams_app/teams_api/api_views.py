@@ -178,7 +178,7 @@ class ManageTeam(viewsets.ModelViewSet):
                 return JsonResponse(data={"error": "Relationship not found"} ,status=404)
             
             teamRel:Relationship = rel[0]
-            if teamRel:
+            if teamRel.favourite:
                 teamRel.favourite = False
             else:
                 teamRel.favourite = True
